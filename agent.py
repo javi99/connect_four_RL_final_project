@@ -66,17 +66,22 @@ class FeedforwardAgent(AbstractAgent):
         layers = []
         from jax.example_libraries import stax
         for i, sh in enumerate(self.shapes[1:]):
+            print(f"layer shape: {sh}")
             if len(sh) ==3:
                 ks = [self.shapes[i][0] - sh[0]+1, 
                     self.shapes[i][1] - sh[1]+1]
                 layers += [stax.Conv(sh[-1], ks)]
+                print("conv")
             else:
                 assert len(sh) == 1
                 if len(self.shapes[i]) == 3:
                     layers += [stax.Flatten]
+                    print("flatten to go from conv to dense")
                 layers += [stax.Dense(*sh)]
-            if nonlinearity[i] == 'ReLU':
+                print("dense")
+            if nonlinearity[i] == 'relu':
                 layers += [stax.Relu]
+                print("relu")
         self._initop, predict = stax.serial(*layers)
         self._predict = jit(predict)
         print("shapes:", self.shapes)
